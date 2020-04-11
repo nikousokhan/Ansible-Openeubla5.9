@@ -1,0 +1,31 @@
+---
+- name: Install common software requirements for RedHat-Base
+  yum:
+    name:
+      - deltarpm
+      - epel-release
+      - vim
+      - yum-utils
+      - bash-completion
+      - net-tools
+      - iftop
+      - htop
+      - python-passlib
+      - elinks
+    state: present
+
+
+- name: install the latest version of NTP Server
+  yum:
+    name: ntp
+    state: present
+  register: result
+
+
+- name: Template a file to /etc/ntp.conf
+  template:
+    src: redhat/ntp.conf.j2
+    dest: /etc/ntp.conf
+  notify:
+    - restart-ntpd
+

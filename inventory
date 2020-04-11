@@ -1,0 +1,12 @@
+all:
+  children:
+    openebula-frontend:
+      hosts:
+        master-node:
+          ansible_host: '{{ master_node_ip }}'
+    compute-nodes:
+      hosts:
+        compute_01: 
+          ansible_host: '{{ compute_01_ip }}'
+        compute_02:
+          ansible_host: '{{ compute_02_ip }}'

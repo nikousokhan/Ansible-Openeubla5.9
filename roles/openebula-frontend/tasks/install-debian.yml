@@ -1,0 +1,66 @@
+---
+## install and configure frontend machine
+- name: install debian packages
+  apt: name={{item}} state=latest
+  with_items:
+    - opennebula
+    - opennebula-common
+    - opennebula-node
+    - opennebula-sunstone
+    - opennebula-tools
+    - ruby-opennebula
+
+- name: install dependancies
+  apt: name={{item}} state=present
+  with_items:
+    - make
+    - gcc
+    - g++
+    - libsqlite3-dev
+    - libcurl4-openssl-dev
+    - libmysqlclient-dev
+    - rake
+    - libxml2-dev
+    - libxslt1-dev
+    - nfs-kernel-server
+    - qemu-utils
+
+- name: install ruby dependancies
+  gem: name={{item}} state=present
+  with_items:
+    - sqlite3
+    - amazon-ec2
+    - curb
+    - mysql
+    - net-ldap
+
+- name: copy oned.conf
+  template: src=oned.conf dest=/etc/one/oned.conf
+  tags:
+    - config
+
+- name: start opennebula
+  service: name=opennebula state=started enabled=yes
+
+- name: install sunstone configruation
+  template: src=sunstone-server.conf dest=/etc/one/sunstone-server.conf
+
+- name: start sunstone
+  service: name=opennebula-sunstone state=started enabled=yes
+
+- name: install oneflow configruation
+  template: src=oneflow-server.conf dest=/etc/one/oneflow-server.conf
+
+## generate public/private keys, this should be shared across the ONE frontend and nodes in the oneadmin account
+- name: Generate_keys for oneadmin
+  user: name=oneadmin generate_ssh_key=yes
+
+- name: Fetch generated public key from frontend oneadmin account
+  fetch: src={{item}} dest=private/ flat=yes
+  with_items:
+    - /var/lib/one/.ssh/id_rsa.pub
+    - /var/lib/one/.ssh/id_rsa
+    - /var/lib/one/.one/one_auth
+
+- name: Install insecure config for oneadmin
+  action: copy src=files/insecure_config dest=/var/lib/one/.ssh/config owner=oneadmin group=cloud mode=0600

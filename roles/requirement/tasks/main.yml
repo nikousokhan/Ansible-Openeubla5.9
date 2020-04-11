@@ -1,0 +1,33 @@
+---
+- import_tasks: selinux.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- import_tasks: firewalld.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- import_tasks: ssh-key.yml
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+  notify:
+    - restart ssh      
+
+- import_tasks: ssh-key.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+  notify:
+    - restart ssh
+
+- name: restart ssh
+  systemd:
+        name: sshd
+        state: restarted
+        enabled: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- name: check date
+  command: date
+  register: out
+- debug:
+    msg: "{{out.stdout}}"
+- pause:
+    prompt: "-----------Maka Sure Completion Full requirement  is Completed-----------"
+    seconds: 15
+

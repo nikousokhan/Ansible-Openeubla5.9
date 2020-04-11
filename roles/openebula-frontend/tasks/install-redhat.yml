@@ -1,0 +1,112 @@
+---
+- name: Step 1. Add multiple repositories into the same file (1/2)
+  yum_repository:
+    file: opennebula
+    name: opennebula
+    description: package-install
+    baseurl: https://downloads.opennebula.org/repo/5.9/CentOS/7/x86_64
+    enabled: yes
+    gpgkey: https://downloads.opennebula.org/repo/repo.key
+    gpgcheck: yes
+
+- name: Step 2. yum-clean-metadata
+  command: yum clean metadata
+  args:
+    warn: no
+
+- name: Step 3. Installing the Software
+  yum:
+    name:
+      - opennebula
+      - opennebula-server
+      - opennebula-sunstone
+      - opennebula-ruby
+      - opennebula-java
+      - opennebula-gate
+      - opennebula-flow
+    state: present
+    
+- name: Step 4. Install expect for unattended running of /usr/share/one/install_gems
+  yum:
+    name:  expect
+    state: present
+
+- name: Step 5. Obtain the status of /root/install_gems
+  stat:
+    path: /root/install_gems
+  register: root_install_gems
+
+- name: Step 6. Create expect file for unattended running of /usr/share/one/install_gems on RHEL
+  blockinfile:
+    path:   /root/install_gems
+    block:  |
+      #!/usr/bin/expect --
+      spawn /bin/ruby /usr/share/one/install_gems
+      expect "1. CentOS/RedHat/Scientific"
+      send "1\r"
+      expect "Press enter to continue..."
+      send "\r"
+      expect "Is this ok \\\[y/d/N\\\]:"
+      send "y\r"
+      expect "Press enter to continue..."
+      send "\r"
+      set timeout -1
+      expect "Abort."
+      puts "Ended expect script."
+    create: yes
+    state:  present
+    marker: "# {mark} CREATED BY ANSIBLE"
+  when: root_install_gems.stat.exists == False
+  become_user: root
+
+- name: Step 7. Ruby Runtime Installation
+  shell:  expect /root/install_gems&& touch /root/install_gems.done
+  args:
+    creates: /root/install_gems.done
+
+
+- name: Step 8. Change oneadmin password
+  shell: "echo 'oneadmin:{{ oneadmin_password }}' > /var/lib/one/.one/one_auth&& touch /var/lib/one/.one/one_auth.done"
+  args:
+    creates: /var/lib/one/.one/one_auth.done
+  become_user: oneadmin
+
+- name: Step 9. copy oned.conf
+  template: src=oned.conf.j2 dest=/etc/one/oned.conf
+  tags:
+    - config
+
+- name: Step 10. Starting OpenNebula
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - opennebula
+    - opennebula-sunstone
+
+- name: Step 11. Wait for opennebula sunstone to start
+  wait_for:
+    port:    9869
+    delay:   3
+    timeout: 5
+
+- name: Step 12. Verifying the Installation - Linux CLI - always run (non-idempotent)
+  shell:       oneuser show
+  become:      yes
+  become_user: oneadmin
+  register:    linux_cli
+  until:       "'USER 0 INFORMATION' in linux_cli.stdout"
+  retries:     5
+  delay:       1
+  ignore_errors: yes
+
+  #- name: Step 13. Verifying the Installation - Sunstone
+  #  get_url:
+  #    url:              "http://'{{ master_node_ip }}':9869"
+  #    url_password:     "{{ oneadmin_password }}"
+  #    url_username:     oneadmin
+  #    dest:             /dev/null
+  #    force_basic_auth: yes
+  #  become:      yes
+  #  become_user: oneadmin

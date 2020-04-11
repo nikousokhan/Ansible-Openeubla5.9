@@ -1,0 +1,69 @@
+---
+
+- import_tasks: install-redhat.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+
+- import_tasks: install-debian.yml
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- import_tasks: secure.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat' or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Ensure mysql is running and starts on boot
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Ensure mysql root password is updated for all root accounts
+  mysql_user:
+    name: root
+    host: localhost
+    #login_unix_socket: /var/run/mysqld/mysqld.sock
+    password: "{{ msi_new_mysql_root_pass }}"
+    priv: '*.*:ALL,GRANT'
+    check_implicit_admin: true
+  become: yes
+
+- name: "Create a new database with name {{ opennebula_db }}"
+  mysql_db:
+    name: "{{ opennebula_db }}"
+    state: present
+  
+- name: "Create user {{ opennebula_db_user }}"
+  mysql_user:
+    name: "{{ opennebula_db_user }}"
+    password: "{{ opennebula_db_pass }}"
+    host: localhost
+    state: present
+    update_password: on_create
+    priv: "{{ opennebula_db }}.*:ALL"
+
+- name: remove test database priviledges
+  command: mysql -u root -p{{ msi_new_mysql_root_pass }} -ne "{{ item }}"
+  with_items:
+    - FLUSH PRIVILEGES      
+
+- name: Ensure MriaDB is running and starts on boot and enabled
+  systemd:
+     name: mariadb
+     state: restarted
+     enabled: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+ 
+- name: Ensure MYQSL is running and starts on boot and enabled
+  systemd:
+     name: mysql
+     state: started
+     enabled: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: check date
+  command: date
+  register: out
+- debug:
+    msg: "{{out.stdout}}"
+- pause:
+    prompt: "-----------Maka Sure Completion Full Setup MYSQL  is Completed-----------"
+    seconds: 15

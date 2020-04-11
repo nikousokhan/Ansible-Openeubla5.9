@@ -1,0 +1,21 @@
+---
+- name: be sure firewalld is installed
+  yum: 
+    name: firewalld 
+    state: installed
+  tags:
+   - install
+
+- name: be sure firewalld is stopped
+  service:
+    name: firewalld
+    state: stopped
+  tags:
+   - disable
+
+- name: be sure firewalld is disabled
+  systemd: 
+    name: firewalld 
+    enabled: False
+  tags:
+   - disable
