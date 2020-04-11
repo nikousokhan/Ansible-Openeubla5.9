@@ -1,0 +1,47 @@
+---
+- name: Add .my.cnf
+  template: 
+       src: my.cnf.j2 
+       dest: /root/.my.cnf 
+       owner: root 
+       group: root 
+       mode: 0600
+
+- name: set mysql root pass
+  mysql_user:
+      login_user: root
+      login_password: "{{ msi_mysql_root_pass }}"
+      user: root
+      host_all: yes
+      password: "{{ msi_new_mysql_root_pass }}"
+  ignore_errors: yes
+
+- name: disable remote root login
+  mysql_user:
+      login_user: root
+      login_password: "{{ msi_new_mysql_root_pass }}"
+      user: root
+      host: "{{ ansible_fqdn | lower }}"
+      state: absent
+
+- name: remove anonymous users
+  mysql_user:
+      login_user: root
+      login_password: "{{ msi_new_mysql_root_pass }}"
+      user: ''
+      host_all: yes
+      state: absent
+
+- name: remove test database
+  mysql_db: 
+      login_user: root
+      login_password: "{{ msi_new_mysql_root_pass }}"
+      db: test
+      state: absent
+  register: remove_testdb
+
+- name: remove test database priviledges
+  command: mysql -u root -p{{ msi_new_mysql_root_pass }} -ne "{{ item }}"
+  with_items:
+    - FLUSH PRIVILEGES
+      #when: remove_testdb|changed

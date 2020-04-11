@@ -1,0 +1,9 @@
+---
+- name: Install MYSQL  Server
+  apt:
+    pkg:
+      - mysql-client
+      - mysql-server
+      - python-mysqldb
+      - libmysqlclient-dev
+      - libmysqld-dev

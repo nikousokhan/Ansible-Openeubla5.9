@@ -1,0 +1,17 @@
+---
+- name: Install MariaDB Server
+  yum:
+    name:
+      - mariadb-server
+      - mariadb
+      - MySQL-python
+    state: present
+
+- name: enable and start MariDB Server
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
+  notify:
+    - restart mysql
+

@@ -1,0 +1,33 @@
+---
+- name: Install common software requirements for Debian-Base
+  become: true
+  apt:
+    state: present
+    name:
+      - python-software-properties
+      - python-virtualenv
+      - python-apt
+      - linux-generic-lts-saucy
+      - vim
+      - bash-completion
+      - net-tools
+      - iftop
+      - htop
+      - python-passlib
+      - curl
+      - python-keyczar
+      - python-pycurl
+      - python-virtualenv
+      - htop
+      - sysstat
+      - dstat
+      - vnstat
+    update-cache: yes
+    cache_valid_time: 3600
+  register: Base
+
+- apt: name=ntp state=present
+- template: src=templates/debian/ntp.conf.j2  dest=/etc/ntp.conf
+  notify:
+    - restart ntp
+
