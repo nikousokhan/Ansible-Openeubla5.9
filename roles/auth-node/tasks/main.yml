@@ -8,6 +8,13 @@
     state=present
     backup=yes
 
+- name: create directory ssh
+  file:  
+    path: /var/lib/one/.ssh
+    state: directory
+    owner: oneadmin
+    group: oneadmin
+
 - name: Install authorized_keys for oneadmin
   authorized_key: user=oneadmin key= "{{ lookup('file', '../../../private/id_rsa.pub') }}" state=present
 

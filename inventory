@@ -10,3 +10,5 @@ all:
           ansible_host: '{{ compute_01_ip }}'
         compute_02:
           ansible_host: '{{ compute_02_ip }}'
+        compute_03:
+          ansible_host: '{{ compute_03_ip }}'
