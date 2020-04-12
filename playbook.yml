@@ -15,6 +15,7 @@
 
 - hosts: compute-nodes 
   become: true
+  gather_facts: true
   roles:
     - role: compute-nodes
   tags: ['compute-node']

@@ -8,7 +8,7 @@
 - name: restart-ntpd
   systemd:
      name: ntpd
-     state: restarted
+     state: started
      enabled: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
 

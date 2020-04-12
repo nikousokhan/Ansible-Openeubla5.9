@@ -6,16 +6,17 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Ensure OpenNbula  is running and starts on boot 
-  service:
-    name: 
-      - opennebula
-      - opennebula-sunstone
-      - opennebula-flow
-      - opennebula-gate
-      - opennebula-scheduler  
-    state: restarted
-    enabled: yes
+  systemd:
+     name: 
+       - opennebula
+       - opennebula-sunstone
+       - opennebula-flow
+       - opennebula-gate
+       - opennebula-scheduler  
+     state: restarted
+     enabled: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+  ignore_errors: yes
 
 - name: check date
   command: date
