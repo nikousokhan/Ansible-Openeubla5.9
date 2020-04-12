@@ -4,7 +4,7 @@
     file: opennebula
     name: opennebula
     description: package-install
-    baseurl: https://downloads.opennebula.org/repo/{{ opennebula_version }}/CentOS/7/x86_64
+    baseurl: https://downloads.opennebula.org/repo/5.4/CentOS/7/x86_64
     enabled: yes
     gpgkey: https://downloads.opennebula.org/repo/repo.key
     gpgcheck: yes
@@ -20,6 +20,15 @@
     name: opennebula-node-kvm
     state: present
 
+
+- name: Step 3. Newer QEMU/KVM <only CentOS/RHEL 7>
+  yum:
+    name: 
+      - centos-release-qemu-ev
+      - qemu-kvm-ev  
+    state: present
+
+    
 - name: install libvirtd.conf
   template: src=libvirtd.conf.j2  dest=/etc/libvirt/libvirtd.conf
 
