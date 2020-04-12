@@ -20,12 +20,10 @@
       - opennebula
       - opennebula-server
       - opennebula-sunstone
-      - opennebula-ruby
-      - opennebula-java
       - opennebula-gate
       - opennebula-flow
     state: present
-    
+#-------------------------------------------------------------------------------------------------------------------------------------    
 - name: Step 4. Install expect for unattended running of /usr/share/one/install_gems
   yum:
     name:  expect
@@ -63,50 +61,85 @@
   shell:  expect /root/install_gems&& touch /root/install_gems.done
   args:
     creates: /root/install_gems.done
-
-
-- name: Step 8. Change oneadmin password
-  shell: "echo 'oneadmin:{{ oneadmin_password }}' > /var/lib/one/.one/one_auth&& touch /var/lib/one/.one/one_auth.done"
-  args:
-    creates: /var/lib/one/.one/one_auth.done
-  become_user: oneadmin
+#-------------------------------------------------------------------------------------------------------------------------------------
 
 - name: Step 9. copy oned.conf
   template: src=oned.conf.j2 dest=/etc/one/oned.conf
   tags:
     - config
 
-- name: Step 10. Starting OpenNebula
-  service:
-    name: "{{ item }}"
-    state: started
-    enabled: true
+
+#- name: install sunstone configruation
+#  template: src=sunstone-server.conf.j2 dest=/etc/one/sunstone-server.conf
+
+      
+#-------------------------------------------------------------------------------------------------------------------------------------
+- name: Step 8. Change oneadmin password
+  shell: "echo 'oneadmin:{{ oneadmin_password }}' > /var/lib/one/.one/one_auth&& touch /var/lib/one/.one/one_auth.done"
+  args:
+    creates: /var/lib/one/.one/one_auth.done
+  become_user: oneadmin
+
+## generate public/private keys, this should be shared across the ONE frontend and nodes in the oneadmin account
+#- name: Generate_keys for oneadmin
+#  user: name=oneadmin generate_ssh_key=yes
+
+- name: Fetch generated public key from frontend oneadmin account
+  fetch: src={{item}} dest=private/ flat=yes
   with_items:
-    - opennebula
-    - opennebula-sunstone
+    - /var/lib/one/.ssh/id_rsa.pub
+    - /var/lib/one/.ssh/id_rsa
+    - /var/lib/one/.one/one_auth
+
+- name: Install insecure config for oneadmin
+  action: copy src=files/insecure_config dest=/var/lib/one/.ssh/config owner=oneadmin group=oneadmin  mode=0600
+
+- name: Change file ownership, group and permissions
+  file:
+    path: /var/lib/one/
+    recurse: yes
+    owner: oneadmin
+    group: oneadmin
+  
+#------------------------------------------------------------------------------------------------------------------------------------
+
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: opennebula
+    enabled: yes
+  ignore_errors: yes
+
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: opennebula-sunstone
+    enabled: yes
+  ignore_errors: yes
 
 - name: Step 11. Wait for opennebula sunstone to start
   wait_for:
     port:    9869
     delay:   3
     timeout: 5
-
-- name: Step 12. Verifying the Installation - Linux CLI - always run (non-idempotent)
-  shell:       oneuser show
-  become:      yes
-  become_user: oneadmin
-  register:    linux_cli
-  until:       "'USER 0 INFORMATION' in linux_cli.stdout"
-  retries:     5
-  delay:       1
+  
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: opennebula-flow
+    enabled: yes
   ignore_errors: yes
 
-  #- name: Step 13. Verifying the Installation - Sunstone
-  #  get_url:
-  #    url:              "http://'{{ master_node_ip }}':9869"
-  #    url_password:     "{{ oneadmin_password }}"
-  #    url_username:     oneadmin
-  #    dest:             /dev/null
-  #    force_basic_auth: yes
-  #  become:      yes
-  #  become_user: oneadmin
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: opennebula-gate
+    enabled: yes
+  ignore_errors: yes
+
+- name: Make sure a service is running
+  systemd:
+    state: started
+    name: opennebula-scheduler
+    enabled: yes
+  ignore_errors: yes  

@@ -1,0 +1,28 @@
+---
+## install public/private keys, this should be shared across the ONE frontend and nodes in the oneadmin account
+- name: Disable Password Authentication
+  lineinfile:
+    dest=/etc/ssh/sshd_config
+    regexp='^PasswordAuthentication'
+    line="PasswordAuthentication no"
+    state=present
+    backup=yes
+
+- name: Install authorized_keys for oneadmin
+  authorized_key: user=oneadmin key= "{{ lookup('file', '../../../private/id_rsa.pub') }}" state=present
+
+- name: Copy file with owner and permissions
+  copy:
+    src: "../../../private/{{ item }}"
+    dest: "/var/lib/one/.ssh/authorized_keys"
+    owner: oneadmin
+    group: oneadmin
+    mode: '0600'
+  with_items:  
+    - id_rsa.pub
+  
+- name: Make sure a service is running
+  systemd:
+    state: restarted
+    name: sshd
+    enabled: yes

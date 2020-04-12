@@ -10,8 +10,6 @@
 - name: enable and start MariDB Server
   systemd:
     name: mariadb
-    state: started
+    state: restarted
     enabled: yes
-  notify:
-    - restart mysql
 

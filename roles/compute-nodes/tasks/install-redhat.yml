@@ -1,5 +1,4 @@
 ---
-
 - name: Step 1. Add multiple repositories into the same file (1/2)
   yum_repository:
     file: opennebula
@@ -21,70 +20,23 @@
     name: opennebula-node-kvm
     state: present
 
+- name: install libvirtd.conf
+  template: src=libvirtd.conf.j2  dest=/etc/libvirt/libvirtd.conf
+
+#- name: Upload ssh config
+#  copy: src=files/insecure_config dest=/var/lib/one/.ssh/config owner=oneadmin group=oneadmin mode=0600
+
+- name: Recursively change ownership of a directory
+  file:
+    path: /var/lib/one/.ssh
+    state: directory
+    recurse: yes
+    owner: oneadmin
+    group: oneadmin
+  become_user: oneadmin
+
 - name: Step 4. Ensure OpenNbula  is running and starts on boot
   systemd:
     name: libvirtd
-    state: started
+    state: restarted
     enabled: yes
-
-## install public/private keys, this should be shared across the ONE frontend and nodes in the oneadmin account
-- name: Install authorized_keys for oneadmin
-  authorized_key: 
-    user: oneadmin 
-    key: "{{ lookup('file', '../../../private/root/id_rsa.pub') }}"
-    state: present
-  #ignore_errors: yes
-
-- name: Upload ssh keypair and config from the frontend node
-  copy: 
-    src: "../../../private/root/{{ item }}" 
-    dest: "/var/lib/one/.ssh/{{ item }}"
-    owner: oneadmin 
-    group: root
-    mode: 0600
-  with_items:
-    - id_rsa.pub
-    - id_rsa
-  #ignore_errors: True
-
-- name: Upload ssh config
-  copy: 
-    src: files/insecure_config 
-    dest: /var/lib/one/.ssh/config 
-    owner: oneadmin 
-    group: root 
-    mode: 0600
-  #ignore_errors: True
-
-
-
-
-#- name: Step 5. Configure Passwordless SSH - create the known_hosts file
-#  shell: "ssh-keyscan {{ groups['one'] | join(' ') }} > /var/lib/one/.ssh/known_hosts"
-#  args:
-#    creates: /var/lib/one/.ssh/known_hosts
-#  become:      yes
-#  become_user: oneadmin
-#  run_once: true
-
-#- name: Step 6. Configure Passwordless SSH - fetch public key - always run (non-idempotent)
-#  shell:    cat /var/lib/one/.ssh/id_rsa.pub
-#  register: ssh_public_key
-
-#- name: Step 7. Configure Passwordless SSH - deploy public key
-#  authorized_key:
-#    user: oneadmin
-#    key:  "{{ item[0] }}"
-#  delegate_to: "{{ item[1] }}"
-#  with_nested:
-#    - "{{ ssh_public_key.stdout }}"
-#    - "{{ groups['one'] }}"
-
-#- name: Step 8. Make the initial ssh connection with StrictHostKeyChecking=no to accept public host key - always run (non-idempotent)
-#  command:     "ssh -o StrictHostKeyChecking=no oneadmin@{{ item[0] }} hostname"
-#  become:      yes
-#  become_user: oneadmin
-#  delegate_to: "{{ item[1] }}"
-#  with_nested:
-#    - "{{ groups['one'] }}"
-#    - "{{ groups['one'] }}"

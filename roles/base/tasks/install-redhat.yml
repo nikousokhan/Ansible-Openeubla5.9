@@ -8,12 +8,20 @@
       - yum-utils
       - bash-completion
       - net-tools
-      - iftop
-      - htop
       - python-passlib
-      - elinks
-    state: present
+      - ruby-devel
+      - make
+      - gcc
+      - curl-devel
+      - expat-devel
+      - libxml2-devel
+      - libxslt-devel
+      - rubygem-rake
+      - gcc-c++
+      - mysql-devel
 
+    state: present
+  ignore_errors: yes
 
 - name: install the latest version of NTP Server
   yum:
@@ -28,4 +36,3 @@
     dest: /etc/ntp.conf
   notify:
     - restart-ntpd
-

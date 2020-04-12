@@ -10,17 +10,17 @@
   notify:
     - restart ssh      
 
-- import_tasks: ssh-key.yml
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
-  notify:
-    - restart ssh
+#- import_tasks: ssh-key.yml
+#  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+#  notify:
+#    - restart ssh
 
-- name: restart ssh
-  systemd:
-        name: sshd
-        state: restarted
-        enabled: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
+#- name: restart ssh
+#  systemd:
+#        name: sshd
+#        state: restarted
+#        enabled: yes
+#  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
 
 - name: check date
   command: date
