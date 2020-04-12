@@ -4,7 +4,7 @@
     file: opennebula
     name: opennebula
     description: package-install
-    baseurl: https://downloads.opennebula.org/repo/5.9/CentOS/7/x86_64
+    baseurl:  https://downloads.opennebula.org/repo/{{ opennebula_version }}/CentOS/7/x86_64
     enabled: yes
     gpgkey: https://downloads.opennebula.org/repo/repo.key
     gpgcheck: yes
