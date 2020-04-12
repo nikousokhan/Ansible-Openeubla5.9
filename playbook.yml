@@ -1,21 +1,23 @@
 ---
 - hosts: all 
-  become: true
   gather_facts: true
   roles:
     - role: requirement 
   tags: ['requirement']
 
 - hosts: openebula-frontend 
-  become: true
   roles:
     - role: mysql
     - role: openebula-frontend
   tags: ['openebula-front']
 
 - hosts: compute-nodes 
-  become: true
   gather_facts: true
   roles:
     - role: compute-nodes
   tags: ['compute-node']
+
+- hosts: compute-nodes
+  roles:
+    - role: auth-node
+  tags: ['auth-node']

@@ -8,12 +8,19 @@
 - name: restart-ntpd
   systemd:
      name: ntpd
-     state: started
+     state: restarted
      enabled: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat'
 
-- name: /etc/hosts sets 
-  template: src=templates/hosts.j2  dest=/etc/hosts owner=root group=root
+- name: Building /etc/hosts file
+  lineinfile:
+    dest: "/etc/hosts"
+    regexp: "^{{ item.ip }}.*"
+    line: '{{ item.ip }} {{ item.host }}'
+  with_items: "{{ one_hosts }}"
+  
+#- name: /etc/hosts sets 
+#  template: src=templates/hosts.j2  dest=/etc/hosts owner=root group=root
 
 - name: check date
   command: date
@@ -23,5 +30,3 @@
 - pause:
     prompt: "-----------Maka Sure Completion Base Installation OS Level is Completed-----------"
     seconds: 15
-
-
