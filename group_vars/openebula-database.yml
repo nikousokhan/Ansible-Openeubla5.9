@@ -1,6 +1,4 @@
 ---
-master-node: 192.168.1.11
-
 # msi-mysql_root_pass >> if you already set the root password then assign it
 # to this variable. by default there is no password.
 msi_mysql_root_pass: ""
@@ -11,13 +9,7 @@ msi_mysql_root_pass: ""
 # oh and don't forget, always use ansible vault for sensitive data :)
 msi_new_mysql_root_pass: "nikou123"
 
-
-# Variables for opennebula
-host_group: opennebula
-
+#--------------------------------------set name databases and set password for user openenbula
 opennebula_db: opennebula
 opennebula_db_user: oneadmin
 opennebula_db_pass: "nikou123"
-
-oneadmin_password: "oneadmin"
-

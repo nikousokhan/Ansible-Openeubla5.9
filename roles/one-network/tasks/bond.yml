@@ -1,0 +1,34 @@
+---
+
+- name:  create directory /etc/network/interfaces.d/backup/
+  file:
+    path: /etc/network/interfaces.d/backup/
+    state: directory
+
+- name : backup interfaces config
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: true
+  with_items:
+    - src:  /etc/network/interfaces.d/bond4
+      dest: /etc/network/interfaces.d/backup/bond4.back
+    - src:  /etc/network/interfaces.d/bond0
+      dest: /etc/network/interfaces.d/backup/bond0.back  
+  ignore_errors: yes
+
+- name : set interfaces facts
+  set_fact :
+    date_time: "{{lookup('pipe','date \"+%Y%m%d-%H%M\"')}}"
+    interfaces_One_G: "{{ ansible_facts | dict2items | selectattr('value.speed', 'defined') |  selectattr('value.speed', 'equalto' , 1000) | map(attribute='key') | list }}"
+    interfaces_Ten_G: "{{ ansible_facts | dict2items | selectattr('value.speed', 'defined') |  selectattr('value.speed', 'equalto' , 10000) | map(attribute='key') | list }}"
+
+- name: create bond interfaces
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: bond4.j2
+      dest: /etc/network/interfaces.d/bond4
+    - src: bond0.j2
+      dest: /etc/network/interfaces.d/bond0

@@ -1,0 +1,20 @@
+---
+
+- name : backup interfaces config
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: true
+  with_items:
+    - src:  /etc/network/interfaces
+      dest: /etc/network/interfaces_back
+
+- name: create new interfaces
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: interfaces.j2
+      dest: /etc/network/interfaces
+    - src: rt_tables.j2
+      dest: /etc/iproute2/rt_tables

@@ -1,0 +1,4 @@
+---
+service_keys:
+  - user: oneadmin
+    key: 'files/one-servers.pub'

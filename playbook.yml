@@ -1,23 +1,30 @@
 ---
-- hosts: all 
-  gather_facts: true
+- hosts: all
   roles:
-    - role: requirement 
-  tags: ['requirement']
+    - { role: requirement, tags: general-baremetal, become: yes, gather_facts: yes }
 
-- hosts: openebula-frontend 
-  roles:
-    - role: mysql
-    - role: openebula-frontend
-  tags: ['openebula-front']
 
-- hosts: compute-nodes 
-  gather_facts: true
+- hosts: openebula-database
   roles:
-    - role: compute-nodes
-  tags: ['compute-node']
+    - { role: mysql, tags: mysql, become: yes }
+
+
+- hosts: openebula-master
+  roles:
+    - { role: openebula-frontend, tags: openebula, become: yes }
+
 
 - hosts: compute-nodes
   roles:
-    - role: auth-node
-  tags: ['auth-node']
+    - { role: compute-nodes, tags: compute-nodes, become: yes }
+    - { role: auth-node, tags: auth-node, become: yes }
+
+
+#- hosts: ilo-reset-pass
+#  roles:
+#    - { role: ilo-pass, tags: ilo-pass, become: yes }
+
+        
+#- hosts: networks
+#  roles:
+#    - { role: one-network, tags: one-network, become: yes }

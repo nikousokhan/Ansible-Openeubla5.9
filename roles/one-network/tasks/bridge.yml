@@ -1,0 +1,38 @@
+---
+
+- name:  create directory /etc/network/interfaces.d/backup/
+  file:
+    path: /etc/network/interfaces.d/backup/
+    state: directory
+
+- name : backup interfaces config
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: true
+  with_items:
+    - src:  /etc/network/interfaces.d/br4
+      dest: /etc/network/interfaces.d/backup/br4.back
+    - src:  /etc/network/interfaces.d/br0
+      dest: /etc/network/interfaces.d/backup/br0.back
+  ignore_errors: yes
+
+- name : set interfaces facts
+  set_fact :
+    date_time: "{{lookup('pipe','date \"+%Y%m%d-%H%M\"')}}"
+    br4_ip: "{{ lookup('vars', inventory_hostname + '_br4_ip') }}"
+    br4_netmask: "{{ lookup('vars', inventory_hostname + '_br4_netmask') }}"
+    br4_gateway: "{{ lookup('vars', inventory_hostname + '_br4_gateway') }}"
+    br0_ip: "{{ lookup('vars', inventory_hostname + '_br0_ip') }}"
+    br0_netmask: "{{ lookup('vars', inventory_hostname + '_br0_netmask') }}"
+    br0_gateway: "{{ lookup('vars', inventory_hostname + '_br0_gateway') }}"
+
+- name: create bridge interfaces
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - src: br4.j2
+      dest: /etc/network/interfaces.d/br4
+    - src: br0.j2
+      dest: /etc/network/interfaces.d/br0

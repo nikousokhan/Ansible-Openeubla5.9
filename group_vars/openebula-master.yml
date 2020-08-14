@@ -1,0 +1,12 @@
+---
+#master-node: 192.168.1.6
+
+# Variables for opennebula
+host_group: opennebula
+
+oneadmin_password: "oneadmin"
+
+
+opennebula_db: opennebula
+opennebula_db_user: oneadmin
+opennebula_db_pass: "nikou123"

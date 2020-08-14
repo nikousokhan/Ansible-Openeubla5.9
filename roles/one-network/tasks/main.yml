@@ -1,0 +1,21 @@
+---
+
+- import_tasks: install.yml
+  tags:
+    - one-network
+    - one-network-install
+
+- import_tasks: common.yml
+  tags:
+    - one-network
+    - one-network-common
+
+- import_tasks: bond.yml
+  tags:
+    - one-network
+    - one-network-bond
+
+- import_tasks: bridge.yml
+  tags:
+    - one-network
+    - one-network-bridge

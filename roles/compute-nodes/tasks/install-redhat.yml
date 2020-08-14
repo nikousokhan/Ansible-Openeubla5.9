@@ -25,7 +25,7 @@
   yum:
     name: 
       - centos-release-qemu-ev
-      - qemu-kvm-ev  
+      - qemu-kvm 
     state: present
 
     

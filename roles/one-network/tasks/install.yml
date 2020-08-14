@@ -1,0 +1,11 @@
+---
+
+- name: install 
+  apt: 
+    state: latest
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - bridge-utils
+      - ifupdown
+      - ifenslave

@@ -1,0 +1,47 @@
+---
+- name: Add Opennebula Repository Key
+  apt_key:
+    url: https://downloads.opennebula.org/repo/repo.key
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add Opennebula Repository List
+  apt_repository:
+    repo: "deb http://downloads.opennebula.org/repo/{{ opennebula_version }}/{{ ansible_distribution }}/{{ ansible_distribution_version }} stable opennebula"
+    update_cache: yes
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install Opennebula Agent
+  apt:
+    name: opennebula-node
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Create a directory .ssh if it does not exist
+  file:
+    path: /var/lib/one/.ssh
+    state: directory
+    mode: '0755'
+
+- name: Recursively change ownership of a directory .ssh
+  file:
+    path: /var/lib/one/.ssh
+    state: directory
+    recurse: yes
+    owner: oneadmin
+    group: oneadmin
+
+- name: Add oneadmin User SSH Config
+  copy:
+    src: files/sshconfig
+    dest: /var/lib/one/.ssh/config
+
+- name: Add Opennebula Hosts SSH Keys
+  authorized_key:
+    user: "{{ item.user }}"
+    state: present
+    key: "{{ lookup('file', item.key) }}"
+  with_items: "{{ service_keys }}"
+  when: service_keys is defined
+

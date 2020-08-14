@@ -1,0 +1,20 @@
+---
+
+br4_dns_1: "208.67.220.220"
+br4_dns_2: "208.67.222.222"
+
+one-33.compute.afra.snapp.infra_br4_ip: "172.16.79.33"
+one-33.compute.afra.snapp.infra_br4_netmask: "255.255.252.0"
+one-33.compute.afra.snapp.infra_br4_gateway: "172.16.77.134"
+
+one-33.compute.afra.snapp.infra_br0_ip: "172.20.3.33"
+one-33.compute.afra.snapp.infra_br0_netmask: "255.255.252.0"
+one-33.compute.afra.snapp.infra_br0_gateway: "172.20.3.254"
+
+one-08.compute.afra.snapp.infra_br4_ip: "172.16.79.8"
+one-08.compute.afra.snapp.infra_br4_netmask: "255.255.252.0"
+one-08.compute.afra.snapp.infra_br4_gateway: "172.16.77.134"
+
+one-08.compute.afra.snapp.infra_br0_ip: "172.20.3.8"
+one-08.compute.afra.snapp.infra_br0_netmask: "255.255.252.0"
+one-08.compute.afra.snapp.infra_br0_gateway: "172.20.3.254"
